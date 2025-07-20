@@ -2,304 +2,410 @@
 <html>
 <head>
     <title>예절 방탈출</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {
-            background-image: url("https://i.ibb.co/tTHzQQTy/2.jpg");
-            background-size: cover;
+        /* --- 공통 스타일 --- */
+        body, html {
+            height: 100%;
+            margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
         }
 
-        /* 시작 화면 스타일 */
-        #startScreen {
+        .clickable {
+            position: absolute;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .clickable:hover {
+            box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.7);
+        }
+
+        /* --- 모달 공통 스타일 --- */
+        .modal {
+            display: none;
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal-content h2 { margin-top: 0; }
+        
+        .modal-content button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .quiz-options button {
+            display: block;
             width: 100%;
-            height: 100%;
+            margin: 8px 0;
+            padding: 12px 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        /* --- 1단계 스타일 --- */
+        #stage1Body {
+            background-image: url("https://i.ibb.co/tTHzQQTy/2.jpg");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameContainer {
+            width: 80%; max-width: 800px;
+            height: 80vh; max-height: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #startScreen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            z-index: 2;
         }
 
-        #startScreen input {
-            margin: 10px;
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
+        #startScreen input, #startScreen button {
+            margin: 10px; padding: 10px;
+            border-radius: 5px; border: none;
+            width: 80%; max-width: 250px;
         }
 
         #startScreen button {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
             background-color: #5cb85c;
-            color: white;
-            cursor: pointer;
+            color: white; cursor: pointer;
         }
 
-        /* 게임 화면 스타일 */
         #gameScreen {
-            display: none;
+            display: none; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            z-index: 2;
         }
 
-        .clickable {
-            position: absolute;
-            cursor: pointer;
-            width: 200px;
-            height: 250px;
-            margin-left: -50px;
-            margin-top: -50px;
-        }
+        #액자 { top: 20%; left: 15%; width: 15%; height: 20%; }
+        #의자 { top: 60%; left: 40%; width: 15%; height: 20%; }
+        #왕관 { top: 10%; left: 60%; width: 15%; height: 20%; }
+        #창문 { top: 30%; right: 5%; width: 15%; height: 20%; }
+        #벽조명 { top: 40%; left: 5%; width: 15%; height: 20%; }
 
-        #액자 {
-            top: 20%;
-            left: 15%;
-        }
-
-        #의자 {
-            top: 60%;
-            left: 40%;
-        }
-
-        #왕관 {
-            top: 10%;
-            left: 60%;
-        }
-
-        #창문 {
-            top: 30%;
-            right: 5%;
-        }
-
-        #벽조명 {
-            top: 40%;
-            left: 5%;
-        }
-
-        /* 호버 효과 */
-        .clickable:hover {
-            box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.7);
-            transition: box-shadow 0.3s ease;
-        }
-
-        /* 모달 스타일 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
+        .ui-display {
+            position: absolute; top: 20px;
+            color: white; font-size: 20px;
+            z-index: 3;
+            background-color: rgba(0,0,0,0.5);
+            padding: 5px 10px;
             border-radius: 5px;
-            text-align: center;
         }
-
-        /* 퀴즈 스타일 */
-        .quiz-options button {
-            margin: 5px;
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-
-        /* 시간 표시 스타일 */
+        
+        /* 12시 방향(상단 중앙)에 타이머 배치 */
         #timer {
-            position: absolute;
-            top: 20px;
+            /* [핵심 수정] 이제 timer는 body 직속 자식이므로 position: fixed 사용 */
+            position: fixed;
             left: 50%;
             transform: translateX(-50%);
-            color: white;
-            font-size: 20px;
+        }
+        
+        #hintDisplay { right: 20px; }
+
+
+        /* --- 2단계 스타일 --- */
+        #stage2Container {
+            display: none; width: 100%; height: 100%;
+            position: relative;
+            background-image: url("https://i.ibb.co/PGRJRtrm/Whisk-b33297c70e.jpg");
+            background-size: cover;
+            background-position: center;
         }
 
-        /* 힌트 표시 스타일 */
-        #hintDisplay {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 20px;
+        #fountain { top: 35%; left: 60%; width: 10%; height: 20%; }
+        #rose { top: 70%; left: 80%; width: 5%; height: 10%; }
+        #bird { top: 20%; left: 30%; width: 7%; height: 10%; }
+        #chair2 { top: 60%; left: 40%; width: 10%; height: 15%; }
+        #garden-door { top: 45%; left: 10%; width: 8%; height: 30%; }
+
+        #s2_hintDisplay {
+             position: absolute; top: 20px; right: 20px;
+             color: white; font-size: 24px;
+             z-index: 3;
+             background-color: rgba(0,0,0,0.5);
+             padding: 10px 15px;
+             border-radius: 5px;
+             font-family: 'Courier New', Courier, monospace;
+             letter-spacing: 5px;
         }
 
     </style>
 </head>
 <body>
-    <!-- 시작 화면 -->
-    <div id="startScreen">
-        <h1>예절 방탈출 게임</h1>
-        <input type="text" id="grade" placeholder="학년">
-        <input type="text" id="class" placeholder="반">
-        <input type="text" id="name" placeholder="이름">
-        <button onclick="startGame()">게임 시작</button>
-    </div>
+    <!-- [핵심 수정] 타이머를 body 바로 아래로 이동시키고, 처음엔 숨김 -->
+    <div id="timer" class="ui-display" style="display: none;">소요 시간: 00:00</div>
 
-    <!-- 게임 화면 -->
-    <div id="gameScreen">
-        <div id="timer">소요 시간: 00:00</div>
-        <div id="hintDisplay">힌트: <span id="passwordHint"></span></div>
-        <div id="액자" class="clickable" onclick="showQuiz('액자')"></div>
-        <div id="의자" class="clickable" onclick="showQuiz('의자')"></div>
-        <div id="왕관" class="clickable" onclick="showQuiz('왕관')"></div>
-        <div id="창문" class="clickable" onclick="openPasswordModal()"></div>
-        <div id="벽조명" class="clickable" onclick="showQuiz('벽조명')"></div>
-
-        <!-- 퀴즈 모달 -->
-        <div id="quizModal" class="modal">
-            <div class="modal-content">
-                <h2 id="quizTitle"></h2>
-                <p id="quizText"></p>
-                <div class="quiz-options">
-                    <button onclick="checkAnswer('option1')"></button>
-                    <button onclick="checkAnswer('option2')"></button>
-                    <button onclick="checkAnswer('option3')"></button>
-                </div>
-                <p id="resultMessage"></p>
+    <!-- 1단계 컨테이너 -->
+    <div id="stage1Body">
+        <div id="gameContainer">
+            <div id="startScreen">
+                <h1>예절 방탈출 게임</h1>
+                <input type="text" id="grade" placeholder="학년">
+                <input type="text" id="class" placeholder="반">
+                <input type="text" id="name" placeholder="이름">
+                <button onclick="startGame()">게임 시작</button>
+            </div>
+            <div id="gameScreen">
+                <!-- 타이머가 body로 이동함 -->
+                <div id="hintDisplay" class="ui-display">힌트: <span id="passwordHint"></span></div>
+                <div id="액자" class="clickable" onclick="showQuiz1('액자')"></div>
+                <div id="의자" class="clickable" onclick="showQuiz1('의자')"></div>
+                <div id="왕관" class="clickable" onclick="showQuiz1('왕관')"></div>
+                <div id="창문" class="clickable" onclick="openPasswordModal1()"></div>
+                <div id="벽조명" class="clickable" onclick="showQuiz1('벽조명')"></div>
             </div>
         </div>
+    </div>
 
-        <!-- 비밀번호 입력 모달 -->
-        <div id="passwordModal" class="modal">
-            <div class="modal-content">
-                <h2>비밀번호를 입력하세요</h2>
-                <input type="password" id="passwordInput">
-                <button onclick="checkPassword()">확인</button>
-            </div>
+    <!-- 2단계 컨테이너 -->
+    <div id="stage2Container">
+        <div id="s2_hintDisplay">획득한 비밀번호: <span id="s2_passwordHint">????</span></div>
+        <div id="fountain" class="clickable" onclick="showQuiz2('fountain')"></div>
+        <div id="rose" class="clickable" onclick="showQuiz2('rose')"></div>
+        <div id="bird" class="clickable" onclick="showQuiz2('bird')"></div>
+        <div id="chair2" class="clickable" onclick="showQuiz2('chair2')"></div>
+        <div id="garden-door" class="clickable" onclick="openPasswordModal2()"></div>
+    </div>
+
+    <!-- 공용 모달 창들 -->
+    <div id="quizModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="quizTitle"></h2>
+            <p id="quizText"></p>
+            <div id="quizOptions" class="quiz-options"></div>
+            <p id="quizResultMessage"></p>
+        </div>
+    </div>
+
+    <div id="passwordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="passwordTitle">비밀번호 입력</h2>
+            <input type="password" id="passwordInput" style="width: 80%; padding: 10px; font-size: 1.2em;">
+            <button id="passwordSubmit">확인</button>
+        </div>
+    </div>
+    
+    <div id="notificationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="notificationTitle"></h2>
+            <p id="notificationMessage"></p>
+            <button id="notificationClose">확인</button>
         </div>
     </div>
 
     <script>
-        let timerInterval;
-        let seconds = 0;
-        let passwordHint = "";
+        // --- 전역 변수 및 공용 함수 ---
+        const notificationModal = document.getElementById('notificationModal');
+        const notificationTitle = document.getElementById('notificationTitle');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const notificationClose = document.getElementById('notificationClose');
+        let onNotificationClose = null;
 
-        // 퀴즈 데이터
-        const quizzes = {
-            '액자': {
-                title: "액자 퀴즈",
-                text: "문제: 어른을 만났을 때 어떻게 인사해야 할까요?",
-                options: ["크게 소리 지른다", "정중하게 인사한다", "모른 척 지나간다"],
-                answer: "option2",
-                hint: "2"
-            },
-            '의자': {
-                title: "의자 퀴즈",
-                text: "문제: 식사 중에 지켜야 할 예절은 무엇일까요?",
-                options: ["쩝쩝 소리를 낸다", "조용히 먹는다", "돌아다니면서 먹는다"],
-                answer: "option2",
-                hint: "0"
-            },
-            '왕관': {
-                title: "왕관 퀴즈",
-                text: "문제: 어른에게 물건을 드릴 때 어떻게 드려야 할까요?",
-                options: ["한 손으로 드린다", "두 손으로 드린다", "발로 찬다"],
-                answer: "option2",
-                hint: "2"
-            },
-            '벽조명': {
-                title: "벽조명 퀴즈",
-                text: "문제: 공공장소에서 지켜야 할 예절은 무엇일까요?",
-                options: ["큰 소리로 떠든다", "조용히 한다", "뛰어다닌다"],
-                answer: "option2",
-                hint: "5"
+        function showNotification(title, message, callback) {
+            notificationTitle.innerText = title;
+            notificationMessage.innerText = message;
+            notificationModal.style.display = 'flex';
+            onNotificationClose = callback;
+        }
+
+        notificationClose.onclick = () => {
+            notificationModal.style.display = 'none';
+            if (typeof onNotificationClose === 'function') {
+                onNotificationClose();
             }
         };
 
-        let currentQuiz = null;
+        // --- 1단계 스크립트 ---
+        let timerInterval;
+        let seconds = 0;
+        let passwordHint = "";
+        const quizzes1 = {
+            '액자': { title: "액자 퀴즈", text: "어른을 만났을 때 어떻게 인사해야 할까요?", options: ["크게 소리 지른다", "정중하게 인사한다", "모른 척 지나간다"], answer: 1, hint: "2" },
+            '의자': { title: "의자 퀴즈", text: "식사 중에 지켜야 할 예절은 무엇일까요?", options: ["쩝쩝 소리를 낸다", "조용히 먹는다", "돌아다니면서 먹는다"], answer: 1, hint: "0" },
+            '왕관': { title: "왕관 퀴즈", text: "어른에게 물건을 드릴 때 어떻게 드려야 할까요?", options: ["한 손으로 드린다", "두 손으로 드린다", "발로 찬다"], answer: 1, hint: "2" },
+            '벽조명': { title: "벽조명 퀴즈", text: "공공장소에서 지켜야 할 예절은 무엇일까요?", options: ["큰 소리로 떠든다", "조용히 한다", "뛰어다닌다"], answer: 1, hint: "5" }
+        };
+        let currentQuiz1 = null;
 
         function startGame() {
-            const grade = document.getElementById('grade').value;
-            const className = document.getElementById('class').value;
-            const name = document.getElementById('name').value;
-
-            if (grade && className && name) {
+            if (document.getElementById('grade').value && document.getElementById('class').value && document.getElementById('name').value) {
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameScreen').style.display = 'block';
+                // [핵심 수정] 타이머를 보이게 처리
+                document.getElementById('timer').style.display = 'block';
                 startTimer();
             } else {
-                alert('학년, 반, 이름을 모두 입력해주세요.');
+                showNotification("입력 오류", "학년, 반, 이름을 모두 입력해주세요.");
             }
         }
 
         function startTimer() {
-            timerInterval = setInterval(function() {
+            timerInterval = setInterval(() => {
                 seconds++;
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                const formattedTime = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-                document.getElementById('timer').innerText = `소요 시간: ${formattedTime}`;
+                const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+                const remSeconds = String(seconds % 60).padStart(2, '0');
+                document.getElementById('timer').innerText = `소요 시간: ${minutes}:${remSeconds}`;
             }, 1000);
         }
 
-        function stopTimer() {
-            clearInterval(timerInterval);
+        function showQuiz1(objectName) {
+            currentQuiz1 = quizzes1[objectName];
+            document.getElementById('quizTitle').innerText = currentQuiz1.title;
+            document.getElementById('quizText').innerText = currentQuiz1.text;
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            currentQuiz1.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.onclick = () => checkAnswer1(index);
+                optionsContainer.appendChild(button);
+            });
+            document.getElementById('quizResultMessage').innerText = '';
+            document.getElementById('quizModal').style.display = 'flex';
         }
 
-        function showQuiz(objectName) {
-            const quiz = quizzes[objectName];
-            document.getElementById('quizTitle').innerText = quiz.title;
-            document.getElementById('quizText').innerText = quiz.text;
-
-            const options = document.querySelectorAll('.quiz-options button');
-            for (let i = 0; i < options.length; i++) {
-                options[i].innerText = quiz.options[i];
-                options[i].setAttribute('data-option', 'option' + (i + 1));
-            }
-
-            document.getElementById('quizModal').style.display = 'block';
-            document.getElementById('resultMessage').innerText = "";
-            currentQuiz = objectName;
-        }
-
-        function checkAnswer(selectedOption) {
-            const quiz = quizzes[currentQuiz];
-            if (selectedOption === quiz.answer) {
-                document.getElementById('resultMessage').innerText = "정답입니다!";
-                passwordHint += quiz.hint;
+        function checkAnswer1(selectedIndex) {
+            if (selectedIndex === currentQuiz1.answer) {
+                document.getElementById('quizResultMessage').innerText = "정답입니다!";
+                passwordHint += currentQuiz1.hint;
                 document.getElementById('passwordHint').innerText = passwordHint;
-                closeQuizModal();
+                setTimeout(() => { document.getElementById('quizModal').style.display = 'none'; }, 1000);
             } else {
-                document.getElementById('resultMessage').innerText = "틀렸습니다. 다시 시도하세요.";
+                document.getElementById('quizResultMessage').innerText = "틀렸습니다. 다시 시도하세요.";
+            }
+        }
+        
+        function openPasswordModal1() {
+            document.getElementById('passwordTitle').innerText = "1단계 비밀번호";
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordSubmit = document.getElementById('passwordSubmit');
+            passwordInput.value = '';
+            passwordSubmit.onclick = checkPassword1;
+            document.getElementById('passwordModal').style.display = 'flex';
+        }
+
+        function checkPassword1() {
+            if (document.getElementById('passwordInput').value === '2025') {
+                document.getElementById('passwordModal').style.display = 'none';
+                // [핵심 수정] 1단계 성공 시 타이머를 멈추지 않음!
+                // clearInterval(timerInterval); 
+                showNotification("성공!", "1단계 탈출! 2단계로 이동합니다.", () => {
+                    document.getElementById('stage1Body').style.display = 'none';
+                    document.getElementById('stage2Container').style.display = 'block';
+                    initializeStage2();
+                });
+            } else {
+                showNotification("실패", "비밀번호가 틀렸습니다.");
             }
         }
 
-        function closeQuizModal() {
-            document.getElementById('quizModal').style.display = 'none';
+        // --- 2단계 스크립트 ---
+        let collectedPasswordDigits = ['?', '?', '?', '?'];
+        const quizzes2 = {
+            'fountain': { title: "분수 퀴즈", text: "어른에게 공손하게 물건을 건네는 방법은?", options: ["던져서 드린다", "한 손으로 드린다", "두 손으로 정중하게 드린다"], answer: 2, hintDigit: '8', hintIndex: 0, solved: false },
+            'rose': { title: "장미 퀴즈", text: "대화 중 상대방의 말을 끊는 것은 어떤 행동일까요?", options: ["상대방을 존중하지 않는 행동이다", "적극적인 참여의 표시다", "내 의견을 강조하는 방법이다"], answer: 0, hintDigit: '1', hintIndex: 1, solved: false },
+            'chair2': { title: "의자 퀴즈", text: "공공장소에서 큰 소리로 통화하는 것은?", options: ["내 자유로운 권리이다", "다른 사람에게 피해를 주는 행동이다", "주목받고 싶다는 표현이다"], answer: 1, hintDigit: '6', hintIndex: 2, solved: false },
+            'bird': { title: "새 퀴즈", text: "온라인 공간(채팅, 댓글)에서 지켜야 할 예절은?", options: ["익명이니 마음대로 말한다", "얼굴이 안보이니 반말을 쓴다", "현실과 같이 예의를 지킨다"], answer: 2, hintDigit: '5', hintIndex: 3, solved: false }
+        };
+        let currentQuiz2 = null;
+
+        function initializeStage2() {
+            collectedPasswordDigits = ['?', '?', '?', '?'];
+            document.getElementById('s2_passwordHint').innerText = collectedPasswordDigits.join('');
         }
 
-        function openPasswordModal() {
-            document.getElementById('passwordModal').style.display = 'block';
+        function showQuiz2(objectName) {
+            currentQuiz2 = quizzes2[objectName];
+            if (currentQuiz2.solved) {
+                showNotification("알림", "이미 해결한 문제입니다.");
+                return;
+            }
+            
+            document.getElementById('quizTitle').innerText = currentQuiz2.title;
+            document.getElementById('quizText').innerText = currentQuiz2.text;
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            currentQuiz2.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.onclick = () => checkAnswer2(index);
+                optionsContainer.appendChild(button);
+            });
+            document.getElementById('quizResultMessage').innerText = '';
+            document.getElementById('quizModal').style.display = 'flex';
         }
-
-        function closePasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-        }
-
-        function checkPassword() {
-            var password = document.getElementById('passwordInput').value;
-            if (password === '2025') {
-                alert('탈출 성공!');
-                stopTimer();
-                closePasswordModal();
+        
+        function checkAnswer2(selectedIndex) {
+            if (selectedIndex === currentQuiz2.answer) {
+                 currentQuiz2.solved = true;
+                 collectedPasswordDigits[currentQuiz2.hintIndex] = currentQuiz2.hintDigit;
+                 document.getElementById('s2_passwordHint').innerText = collectedPasswordDigits.join('');
+                 
+                 document.getElementById('quizModal').style.display = 'none';
+                 showNotification("정답입니다!", `비밀번호 숫자 '${currentQuiz2.hintDigit}'을(를) 획득했습니다!`);
             } else {
-                alert('비밀번호가 틀렸습니다.');
+                document.getElementById('quizResultMessage').innerText = "틀렸습니다. 다시 시도하세요.";
+            }
+        }
+
+        function openPasswordModal2() {
+            document.getElementById('passwordTitle').innerText = "최종 비밀번호";
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordSubmit = document.getElementById('passwordSubmit');
+            passwordInput.value = '';
+            passwordSubmit.onclick = checkPassword2;
+            document.getElementById('passwordModal').style.display = 'flex';
+        }
+
+        function checkPassword2() {
+            if (document.getElementById('passwordInput').value === '8165') {
+                 // [핵심 수정] 최종 성공 시 타이머를 멈춤
+                 clearInterval(timerInterval);
+                 document.getElementById('passwordModal').style.display = 'none';
+                 showNotification("탈출 성공!", "모든 예절 퀴즈를 통과했습니다! 축하합니다!", () => {
+                     location.reload();
+                 });
+            } else {
+                showNotification("실패", "비밀번호가 틀렸습니다.");
             }
         }
     </script>
