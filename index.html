@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>예절 방탈출</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         /* --- 공통 스타일 --- */
         body, html {
@@ -10,6 +10,7 @@
             margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            background-color: #000; /* 기본 배경색 */
         }
 
         .clickable {
@@ -21,6 +22,11 @@
         .clickable:hover {
             box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.7);
         }
+
+        /* [핵심 수정] 반응형 글꼴 크기 적용 */
+        h1 { font-size: clamp(24px, 5vw, 42px); }
+        h2 { font-size: clamp(18px, 4vw, 28px); }
+        p { font-size: clamp(14px, 3vw, 18px); }
 
         /* --- 모달 공통 스타일 --- */
         .modal {
@@ -44,30 +50,29 @@
             max-width: 400px;
         }
         
-        .modal-content h2 { margin-top: 0; }
-        
         .modal-content button {
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: clamp(10px, 2.5vw, 14px) clamp(20px, 4vw, 28px);
             border-radius: 5px;
             border: none;
             background-color: #007bff;
             color: white;
             cursor: pointer;
-            font-size: 16px;
+            font-size: clamp(14px, 3vw, 18px);
         }
 
         .quiz-options button {
-            display: block;
-            width: 100%;
+            display: block; width: 100%;
             margin: 8px 0;
             padding: 12px 15px;
-            border-radius: 5px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            font-size: 1em;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+
+        /* --- 1, 2단계 공용 컨테이너 --- */
+        .stage {
+            width: 100%; height: 100%;
+            position: absolute;
+            top: 0; left: 0;
         }
 
         /* --- 1단계 스타일 --- */
@@ -75,15 +80,14 @@
             background-image: url("https://i.ibb.co/tTHzQQTy/2.jpg");
             background-size: cover;
             background-position: center;
-            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         #gameContainer {
-            width: 80%; max-width: 800px;
-            height: 80vh; max-height: 600px;
+            width: 100%; height: 100%;
+            max-width: 1000px; max-height: 600px;
             position: relative;
             overflow: hidden;
         }
@@ -103,18 +107,12 @@
             margin: 10px; padding: 10px;
             border-radius: 5px; border: none;
             width: 80%; max-width: 250px;
+            font-size: clamp(14px, 3vw, 16px);
         }
 
-        #startScreen button {
-            background-color: #5cb85c;
-            color: white; cursor: pointer;
-        }
+        #startScreen button { background-color: #5cb85c; color: white; cursor: pointer; }
 
-        #gameScreen {
-            display: none; width: 100%; height: 100%;
-            position: absolute; top: 0; left: 0;
-            z-index: 2;
-        }
+        #gameScreen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 2; }
 
         #액자 { top: 20%; left: 15%; width: 15%; height: 20%; }
         #의자 { top: 60%; left: 40%; width: 15%; height: 20%; }
@@ -124,18 +122,15 @@
 
         .ui-display {
             position: absolute; top: 20px;
-            color: white; font-size: 20px;
+            color: white; font-size: clamp(14px, 2.5vw, 20px);
             z-index: 3;
             background-color: rgba(0,0,0,0.5);
             padding: 5px 10px;
             border-radius: 5px;
         }
         
-        /* 12시 방향(상단 중앙)에 타이머 배치 */
         #timer {
-            /* [핵심 수정] 이제 timer는 body 직속 자식이므로 position: fixed 사용 */
-            position: fixed;
-            left: 50%;
+            position: fixed; left: 50%;
             transform: translateX(-50%);
         }
         
@@ -144,8 +139,7 @@
 
         /* --- 2단계 스타일 --- */
         #stage2Container {
-            display: none; width: 100%; height: 100%;
-            position: relative;
+            display: none;
             background-image: url("https://i.ibb.co/PGRJRtrm/Whisk-b33297c70e.jpg");
             background-size: cover;
             background-position: center;
@@ -159,7 +153,7 @@
 
         #s2_hintDisplay {
              position: absolute; top: 20px; right: 20px;
-             color: white; font-size: 24px;
+             color: white; font-size: clamp(16px, 3vw, 24px);
              z-index: 3;
              background-color: rgba(0,0,0,0.5);
              padding: 10px 15px;
@@ -167,15 +161,44 @@
              font-family: 'Courier New', Courier, monospace;
              letter-spacing: 5px;
         }
+        
+        /* [핵심 기능] 화면 방향 안내 메시지 스타일 */
+        #orientation-lock {
+            display: none; /* 평소엔 숨김 */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #222;
+            color: white;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
 
+        /* 세로 모드일 때만 안내 메시지를 표시 */
+        @media (orientation: portrait) {
+            #orientation-lock {
+                display: flex;
+            }
+            .stage {
+                display: none !important; /* 게임 화면 강제 숨김 */
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- [핵심 수정] 타이머를 body 바로 아래로 이동시키고, 처음엔 숨김 -->
+    <!-- [핵심 기능] 화면 방향 안내 메시지 -->
+    <div id="orientation-lock">
+        <div>
+            <h1>화면 방향 안내</h1>
+            <p>원활한 플레이를 위해 기기를<br>가로 모드로 회전해주세요.</p>
+        </div>
+    </div>
+    
     <div id="timer" class="ui-display" style="display: none;">소요 시간: 00:00</div>
 
     <!-- 1단계 컨테이너 -->
-    <div id="stage1Body">
+    <div id="stage1Body" class="stage">
         <div id="gameContainer">
             <div id="startScreen">
                 <h1>예절 방탈출 게임</h1>
@@ -185,7 +208,6 @@
                 <button onclick="startGame()">게임 시작</button>
             </div>
             <div id="gameScreen">
-                <!-- 타이머가 body로 이동함 -->
                 <div id="hintDisplay" class="ui-display">힌트: <span id="passwordHint"></span></div>
                 <div id="액자" class="clickable" onclick="showQuiz1('액자')"></div>
                 <div id="의자" class="clickable" onclick="showQuiz1('의자')"></div>
@@ -197,7 +219,7 @@
     </div>
 
     <!-- 2단계 컨테이너 -->
-    <div id="stage2Container">
+    <div id="stage2Container" class="stage">
         <div id="s2_hintDisplay">획득한 비밀번호: <span id="s2_passwordHint">????</span></div>
         <div id="fountain" class="clickable" onclick="showQuiz2('fountain')"></div>
         <div id="rose" class="clickable" onclick="showQuiz2('rose')"></div>
@@ -233,6 +255,8 @@
     </div>
 
     <script>
+        // 이 부분의 JavaScript 코드는 이전과 동일하므로 생략합니다.
+        // (기능 변경이 없었으므로 그대로 사용하시면 됩니다.)
         // --- 전역 변수 및 공용 함수 ---
         const notificationModal = document.getElementById('notificationModal');
         const notificationTitle = document.getElementById('notificationTitle');
@@ -270,7 +294,6 @@
             if (document.getElementById('grade').value && document.getElementById('class').value && document.getElementById('name').value) {
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameScreen').style.display = 'block';
-                // [핵심 수정] 타이머를 보이게 처리
                 document.getElementById('timer').style.display = 'block';
                 startTimer();
             } else {
@@ -326,8 +349,6 @@
         function checkPassword1() {
             if (document.getElementById('passwordInput').value === '2025') {
                 document.getElementById('passwordModal').style.display = 'none';
-                // [핵심 수정] 1단계 성공 시 타이머를 멈추지 않음!
-                // clearInterval(timerInterval); 
                 showNotification("성공!", "1단계 탈출! 2단계로 이동합니다.", () => {
                     document.getElementById('stage1Body').style.display = 'none';
                     document.getElementById('stage2Container').style.display = 'block';
@@ -398,7 +419,6 @@
 
         function checkPassword2() {
             if (document.getElementById('passwordInput').value === '8165') {
-                 // [핵심 수정] 최종 성공 시 타이머를 멈춤
                  clearInterval(timerInterval);
                  document.getElementById('passwordModal').style.display = 'none';
                  showNotification("탈출 성공!", "모든 예절 퀴즈를 통과했습니다! 축하합니다!", () => {
